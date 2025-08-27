@@ -40,15 +40,21 @@ jobs:
 
       - name: Terraform Init
         run: terraform init -input=false -upgrade
-      
-      - name: Terraform Import Resource Group
-        run: terraform import azurerm_resource_group.rg[0] /subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/$(terraform output -raw rg_name)
-      
+        
       - name: Terraform Validate
         run: terraform validate
 
       - name: Terraform Plan
         run: terraform plan -out tfplan -input=false
+
+      - name: Terraform Import Resource Group
+        if: github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/main'
+        run: |
+         terraform import azurerm_resource_group.rg[0] "/subscriptions/${ARM_SUBSCRIPTION_ID}/resourceGroups/rg-trimble-001"
+         terraform import azurerm_virtual_network.vnet "/subscriptions/${ARM_SUBSCRIPTION_ID}/resourceGroups/rg-trimble-001/providers/Microsoft.Network/virtualNetworks/aks-vnet"
+         terraform import azurerm_subnet.subnet_nodes "/subscriptions/${ARM_SUBSCRIPTION_ID}/resourceGroups/rg-trimble-001/providers/Microsoft.Network/virtualNetworks/aks-vnet/subnets/aks-nodes"
+         terraform import azurerm_kubernetes_cluster.aks "/subscriptions/${ARM_SUBSCRIPTION_ID}/resourceGroups/rg-trimble-001/providers/Microsoft.ContainerService/managedClusters/aks-cluster-001"
+    
 
       - name: Terraform Apply (on workflow_dispatch or main)
         if: github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/main'
