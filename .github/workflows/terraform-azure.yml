@@ -42,7 +42,7 @@ jobs:
         run: terraform init -input=false -upgrade
       
       - name: Terraform Import Resource Group
-        run: terraform import azurerm_resource_group.rg[0] /subscriptions/${{ secrets.AZ_SUBSCRIPTION_ID }}/resourceGroups/$(terraform output -raw rg_name)
+        run: terraform import azurerm_resource_group.rg[0] /subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/$(terraform output -raw rg_name)
       
       - name: Terraform Validate
         run: terraform validate
